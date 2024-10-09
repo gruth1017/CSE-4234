@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const parser = new DOMParser();
             const xml = parser.parseFromString(data, "text/xml");
             const items = xml.querySelectorAll("item");
-
+            
             const loadPage = (items) => {
                 items.forEach(item => {
                     const title = item.querySelector("title").textContent;
