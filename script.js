@@ -87,7 +87,20 @@ document.addEventListener("DOMContentLoaded", () => {
                     removeArticles(); // Clear cards
                     loadPage(filteredByDate); // Load new cards
                 }
-                // Add new filter implementations here
+                // Filter by title functionality vvv
+                filterObj.title = document.querySelector("#title").value
+                if (filterObj.title !== "") { // A title has been entered
+                    const titleFilter = (item, value) => { // Title filter function. Item: item from rss. Value: user-specified title
+                        let itemTitle = new Date(item.querySelector("title").textContent);
+                        let inputTitle = new Date(value);
+                        return itemTitle === inputTitle ? true : false;
+                    }
+                    let filteredByTitle = filterEvents(items, filterObj.title, titleFilter); // Events having the specified title are stored in filteredByTitle
+                    removeArticles(); // Clear cards
+                    loadPage(filteredByTitle); // Load new cards
+                }
+
+                // Add new filter implementations here...vvvv
             });
             /* End of Filter */
         }).catch(error => {
