@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const parser = new DOMParser();
             const xml = parser.parseFromString(data, "text/xml");
             const items = xml.querySelectorAll("item");
-            
+
             const loadPage = (items) => {
                 items.forEach(item => {
                     const title = item.querySelector("title").textContent;
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         day: 'numeric'
                     });
                     const imageUrl = item.querySelector("enclosure")?.getAttribute('url') || 'https://static.campuslabsengage.com/discovery/images/events/learning.jpg';
-        
+
                     // Creating event card
                     const article = document.createElement('article');
                     article.innerHTML = `
@@ -35,14 +35,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div class="description">${description}</div>
                     `;
-        
+
                     // Toggle description
                     const learnMore = article.querySelector('.learn-more');
                     const desc = article.querySelector('.description');
                     learnMore.addEventListener('click', () => {
                         desc.style.display = desc.style.display === 'block' ? 'none' : 'block';
                     });
-        
+
                     eventsContainer.appendChild(article);
                 });
 
@@ -56,10 +56,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             /* Filter: creates a subset of "list" and then calls loadPage() again with the new list */
 
-            // This is updated whenever submit button is clicked
+            // This is updated whenever submit button is clicked Here >.<
             const filterObj = {
                 "title" : "",
-                "desc" : "",
+                "desc" : "", // Keeping the description field for future use
                 "startDate" : ""
             }
 
@@ -76,7 +76,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const submit_btn = document.querySelector("#submit-btn");
             submit_btn.addEventListener("click", () => { // Do the following when the submit button is clicked
-                let filteredItems = items;
                 filterObj.startDate = document.querySelector("#date").value
                 if (filterObj.startDate !== "") { // A date has been entered
                     const dateFilter = (item, value) => { // Date filter function. Item: item from rss. Value: user-specified date
@@ -84,26 +83,52 @@ document.addEventListener("DOMContentLoaded", () => {
                         let inputDate = new Date(value).setHours(0, 0, 0, 0);
                         return itemDate === inputDate ? true : false;
                     }
-                    let filteredByDate = filterEvents(filteredItems, filterObj.startDate, dateFilter); // Events having the specified date are stored in filteredByDate
-                    filteredItems = filteredByDate;
+                    let filteredByDate = filterEvents(items, filterObj.startDate, dateFilter); // Events having the specified date are stored in filteredByDate
+                    removeArticles(); // Clear cards
+                    loadPage(filteredByDate); // Load new cards
                 }
+                
                 // Filter by title functionality vvv
                 filterObj.title = document.querySelector("#title").value
                 if (filterObj.title !== "") { // A title has been entered
                     const titleFilter = (item, value) => { // Title filter function. Item: item from rss. Value: user-specified title
-                        let itemTitle = item.querySelector("title").textContent;
-                        let inputTitle = value;
-                        return itemTitle.toLowerCase().includes(inputTitle.toLowerCase()) ? true : false;
+                        let itemTitle = item.querySelector("title").textContent.toLowerCase();
+                        return itemTitle.includes(value.toLowerCase());
                     }
-                    let filteredByTitle = filterEvents(filteredItems, filterObj.title, titleFilter); // Events having the specified title are stored in filteredByTitle
-                    filteredItems = filteredByTitle;
+                    let filteredByTitle = filterEvents(items, filterObj.title, titleFilter); // Events having the specified title are stored in filteredByTitle
+                    removeArticles(); // Clear cards
+                    loadPage(filteredByTitle); // Load new cards
                 }
 
-                removeArticles(); // Clear cards
-                loadPage(filteredItems); // Load new cards
+                // Filter by description functionality (Christian's code)
+                filterObj.desc = document.querySelector("#desc").value; // Check if a description is entered
+                if (filterObj.desc !== "") { // A description has been entered
+                    const descriptionFilter = (item, value) => { // Description filter function. Item: item from rss. Value: user-specified description
+                        let itemDescription = item.querySelector("description").textContent.toLowerCase();
+                        return itemDescription.includes(value.toLowerCase()); // Check if the description contains the value
+                    }
+                    let filteredByDesc = filterEvents(items, filterObj.desc, descriptionFilter); // Events having the specified description are stored in filteredByDesc
+                    removeArticles(); // Clear cards
+                    loadPage(filteredByDesc); // Load new cards
+                }
 
-                // Add new filter implementations here...vvvv
             });
+
+            /* Clear Filters Functionality (Christian's code) */
+            const clearFilters = () => {
+                // Clear all input fields (title, description, and date)
+                document.querySelector("#title").value = "";
+                document.querySelector("#desc").value = "";
+                document.querySelector("#date").value = "";
+
+                removeArticles();  // Clear the existing events
+                loadPage(items);  // Reload all events
+            }
+
+            // Attach the event listener to the "Clear Filters" button (it is the second button in our HTML according to DOM> )
+            const clearBtn = document.querySelector("button:nth-of-type(2)");
+            clearBtn.addEventListener("click", clearFilters);
+
             /* End of Filter */
         }).catch(error => {
             console.error('Error fetching the events:', error);
