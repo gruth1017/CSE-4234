@@ -76,6 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const submit_btn = document.querySelector("#submit-btn");
             submit_btn.addEventListener("click", () => { // Do the following when the submit button is clicked
+                let filteredItems = items;
                 filterObj.startDate = document.querySelector("#date").value
                 if (filterObj.startDate !== "") { // A date has been entered
                     const dateFilter = (item, value) => { // Date filter function. Item: item from rss. Value: user-specified date
@@ -83,9 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         let inputDate = new Date(value).setHours(0, 0, 0, 0);
                         return itemDate === inputDate ? true : false;
                     }
-                    let filteredByDate = filterEvents(items, filterObj.startDate, dateFilter); // Events having the specified date are stored in filteredByDate
-                    removeArticles(); // Clear cards
-                    loadPage(filteredByDate); // Load new cards
+                    let filteredByDate = filterEvents(filteredItems, filterObj.startDate, dateFilter); // Events having the specified date are stored in filteredByDate
+                    filteredItems = filteredByDate;
                 }
                 
                 // Filter by title functionality vvv
@@ -95,9 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         let itemTitle = item.querySelector("title").textContent.toLowerCase();
                         return itemTitle.includes(value.toLowerCase());
                     }
-                    let filteredByTitle = filterEvents(items, filterObj.title, titleFilter); // Events having the specified title are stored in filteredByTitle
-                    removeArticles(); // Clear cards
-                    loadPage(filteredByTitle); // Load new cards
+                    let filteredByTitle = filterEvents(filteredItems, filterObj.title, titleFilter); // Events having the specified title are stored in filteredByTitle
+                    filteredItems = filteredByTitle;
                 }
 
                 // Filter by description functionality (Christian's code)
@@ -107,10 +106,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         let itemDescription = item.querySelector("description").textContent.toLowerCase();
                         return itemDescription.includes(value.toLowerCase()); // Check if the description contains the value
                     }
-                    let filteredByDesc = filterEvents(items, filterObj.desc, descriptionFilter); // Events having the specified description are stored in filteredByDesc
-                    removeArticles(); // Clear cards
-                    loadPage(filteredByDesc); // Load new cards
+                    let filteredByDesc = filterEvents(filteredItems, filterObj.desc, descriptionFilter); // Events having the specified description are stored in filteredByDesc
+                    filteredItems = filteredByDesc;
                 }
+                removeArticles(); // Clear cards
+                loadPage(filteredItems); // Load new cards
 
             });
 
